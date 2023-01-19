@@ -19,7 +19,7 @@ You will also need to install the following Python packages:
 ```
 openai
 aiogram
-json
+asyncio
 ```
 You can install these packages using pip:
 ```
