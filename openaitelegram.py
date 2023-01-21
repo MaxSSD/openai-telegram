@@ -17,7 +17,7 @@ dp = Dispatcher(bot)
 def get_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", default="text-davinci-003",
-                        help="GPT-3 model to use. Available options: text-davinci-002, text-curie-001, text-babbage-001, text-bart-001, text-code-001, text-transformer-002, text-davinci-002")
+                        help="GPT-3 model to use. Available options: davinci03, davinci02, curie, ada, babbage")
     return parser.parse_args()
 
 
@@ -52,19 +52,19 @@ async def handle_gpt(message):
 @dp.message_handler(commands=['model'])
 async def handle_model(message):
     model = message.text.split()[1]
-    if model not in ["text-davinci-003", "text-davinci-002", "text-curie-001", "text-babbage-001", "text-ada-001"]:
+    models = {'davinci03':"text-davinci-003", 'davinci02':"text-davinci-002",'curie':"text-curie-001" ,'ada':"text-ada-001", 'babbage':"text-babbage-001"}
+    if model not in models:
         await message.reply("Invalid model selected. Please use /help to see available models.")
     else:
         global current_model
-        current_model = model
-        await message.reply(f"Model changed to {model}.")
+        current_model = models[model]
+        await message.reply(f"Model changed to {current_model}.")
 
 
 @dp.message_handler(commands=['help'])
 async def handle_help(message):
-    await message.reply("Use /model option followed by the desired model when running the script.")
-    available_models = "text-davinci-003, text-davinci-002, text-curie-001, text-babbage-001, text-ada-001"
+    await message.reply("Use the command /gpt followed by your prompt to generate a response. Use /model option followed by the desired model when running the script.")
+    available_models = "davinci03, davinci02, curie, babbage, ada"
     await message.reply(f"Available models: {available_models}")
 
-if __name__ == '__main__':
-    executor.start_polling(dp)
+executor.start_polling(dp)
