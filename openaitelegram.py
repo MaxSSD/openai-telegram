@@ -3,13 +3,15 @@ import json
 import argparse
 import asyncio
 import os
+import logging
 from aiogram import Bot, types, executor
 from aiogram.dispatcher import Dispatcher
 from aiogram.utils.executor import start_polling
 from aiogram.types import InputFile
+from api_key import key, bot_token
 
-key = openai.api_key = os.environ.get("OPENAI_KEY")
-bot_token = os.environ.get("BOT_TOKEN")
+# key = openai.api_key = os.environ.get("OPENAI_KEY")
+# bot_token = os.environ.get("BOT_TOKEN")
 
 bot = Bot(token=bot_token)
 dp = Dispatcher(bot)
@@ -20,8 +22,8 @@ previous_response = ""
 
 def get_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model", default="gpt-3.5-turbo",
-                        help="GPT-3 model to use. Available options:gpt-turbo, davinci03, davinci02, curie, babbage, ada")
+    parser.add_argument("--model", default="text-davinci-003",
+                        help="GPT-3 model to use. Available options:davinci03, davinci02, curie, babbage, ada")
     return parser.parse_args()
 
 
@@ -44,8 +46,8 @@ async def handle_gpt(message):
     if prompt.startswith(previous_response):
         prompt = previous_prompt + prompt[len(previous_response):]
 
-    response = openai.Completion.create(engine=model, prompt=prompt, temperature=0, max_tokens=4000,
-                                        top_p=1.0, frequency_penalty=0.0, presence_penalty=0.0)
+    response = openai.Completion.create(
+        engine=model, prompt=prompt, max_tokens=4000)
     response_str = json.dumps(response)
     json_response = json.loads(response_str)
     api_response = json_response['choices'][0]['text']
@@ -54,6 +56,30 @@ async def handle_gpt(message):
     previous_response = api_response
 
     await message.reply(api_response)
+
+
+@dp.message_handler(commands=['chatgpt'])
+async def handle_chat(message):
+    user_prompt = message.text.replace("/chatgpt ", "")
+    prompt = [
+        {"role": "assistant", "content": user_prompt},
+        {"role": "system", "content": "User said: " + user_prompt},
+        {"role": "user", "content": ""}
+    ]
+    try:
+        chat = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=prompt
+        )
+    except openai.error.InvalidRequestError as error:
+        logging.exception(error)
+        await message.reply(str(error))
+        return
+    api_response = chat.choices[0].message
+    response_str = json.dumps(api_response)
+    response_str = response_str[1:-1]
+    response_str = response_str.strip().replace('\n\n', '')
+    await message.reply(response_str)
 
 
 @dp.message_handler(commands=['model'])
@@ -72,7 +98,7 @@ async def handle_model(message):
 @dp.message_handler(commands=['help'])
 async def handle_help(message):
     await message.reply("Welcome to the GPT-3 bot! Use the command /gpt followed by your prompt to generate a response.")
-    await message.reply("To use Gpt-3.5-turbo use command /chat")
+    await message.reply("To use Gpt-3.5-turbo use command /chatgpt - BETA")
     await message.reply("Use /model option followed by the desired model when running the script.")
     available_models = "davinci03, davinci02, curie, babbage, ada"
     await message.reply(f"Available models: {available_models}")
