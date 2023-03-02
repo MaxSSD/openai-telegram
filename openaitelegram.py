@@ -56,29 +56,6 @@ async def handle_gpt(message):
     await message.reply(api_response)
 
 
-async def handle_chat(message):
-    global previous_prompt, previous_response
-    args = get_arguments()
-    model = args.model
-    prompt = message.text.replace("/gpt ", "")
-    if "--model" in prompt:
-        model = prompt.split("--model")[-1].strip()
-    if prompt.startswith(previous_response):
-        prompt = previous_prompt + prompt[len(previous_response):]
-    chat = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=prompt)
-    response_str = json.dumps(chat)
-    json_response = json.loads(response_str)
-
-    api_response = json_response['choices'][0]['message']['content']
-
-    previous_prompt = prompt
-    previous_response = api_response
-
-    await message.reply(api_response)
-
-
 @dp.message_handler(commands=['model'])
 async def handle_model(message):
     model = message.text.split()[1]
