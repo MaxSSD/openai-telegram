@@ -28,22 +28,29 @@ def get_arguments():
 async def start_message(message: types.Message):
     chat_id = message.chat.id
     await message.reply(
-        "Welcome to the GPT-3 bot! Use the command /gpt followed by your prompt to generate a response. Use the command /help to see the available models.")
+        "Welcome to the GPT-3 bot! Use the command /gpt or /chatgpt followed by your prompt to generate a response. Use the command /help to see the available models.")
 
 
 @dp.message_handler(commands=['gpt'])
 async def handle_gpt(message):
+    global previous_prompt, previous_response
     args = get_arguments()
     model = args.model
     prompt = message.text.replace("/gpt ", "")
     if "--model" in prompt:
         model = prompt.split("--model")[-1].strip()
-        
+
+    if prompt.startswith(previous_response):
+        prompt = previous_prompt + prompt[len(previous_response):]
+
     response = openai.Completion.create(
         engine=model, prompt=prompt, max_tokens=4000)
     response_str = json.dumps(response)
     json_response = json.loads(response_str)
     api_response = json_response['choices'][0]['text']
+
+    previous_prompt = prompt
+    previous_response = api_response
 
     await message.reply(api_response)
 
@@ -84,10 +91,8 @@ async def handle_model(message):
 
 @dp.message_handler(commands=['help'])
 async def handle_help(message):
-    await message.reply("Welcome to the GPT-3 bot! Use the command /gpt followed by your prompt to generate a response.")
-    await message.reply("To use Gpt-3.5-turbo use command /chatgpt - BETA")
-    await message.reply("Use /model option followed by the desired model when running the script.")
     available_models = "davinci03, davinci02, curie, babbage, ada"
-    await message.reply(f"Available models: {available_models}")
+    await message.reply("Welcome to the GPT-3 bot! Use the command /gpt followed by your prompt to generate a response. To use Gpt-3.5-turbo use command /chatgpt - BETA")
+    await message.reply(f"Use /model option followed by the desired model when running the script. Available models: {available_models}")
 
 executor.start_polling(dp)
