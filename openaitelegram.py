@@ -16,9 +16,6 @@ from api_key import key, bot_token
 bot = Bot(token=bot_token)
 dp = Dispatcher(bot)
 
-previous_prompt = ""
-previous_response = ""
-
 
 def get_arguments():
     parser = argparse.ArgumentParser()
@@ -36,24 +33,17 @@ async def start_message(message: types.Message):
 
 @dp.message_handler(commands=['gpt'])
 async def handle_gpt(message):
-    global previous_prompt, previous_response
     args = get_arguments()
     model = args.model
     prompt = message.text.replace("/gpt ", "")
     if "--model" in prompt:
         model = prompt.split("--model")[-1].strip()
-
-    if prompt.startswith(previous_response):
-        prompt = previous_prompt + prompt[len(previous_response):]
-
+        
     response = openai.Completion.create(
         engine=model, prompt=prompt, max_tokens=4000)
     response_str = json.dumps(response)
     json_response = json.loads(response_str)
     api_response = json_response['choices'][0]['text']
-
-    previous_prompt = prompt
-    previous_response = api_response
 
     await message.reply(api_response)
 
@@ -63,8 +53,7 @@ async def handle_chat(message):
     user_prompt = message.text.replace("/chatgpt ", "")
     prompt = [
         {"role": "assistant", "content": user_prompt},
-        {"role": "system", "content": "User said: " + user_prompt},
-        {"role": "user", "content": ""}
+        {"role": "system", "content": f"User said: {user_prompt}"},
     ]
     try:
         chat = openai.ChatCompletion.create(
@@ -77,9 +66,7 @@ async def handle_chat(message):
         return
     api_response = chat.choices[0].message
     response_str = json.dumps(api_response)
-    response_str = response_str[1:-1]
-    response_str = response_str.strip().replace('\n\n', '')
-    await message.reply(response_str)
+    await message.reply(response_str[1:-1].strip().replace('"role": "assistant", "content": "', '').encode('utf-8').decode('unicode_escape'))
 
 
 @dp.message_handler(commands=['model'])
