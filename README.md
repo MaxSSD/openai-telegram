@@ -3,6 +3,8 @@ This is a Telegram bot that utilizes the OpenAI GPT-3 API to generate responses 
 
 /gpt followed by the prompt: This will generate a response using the current model. The user can also specify a different model by including --model [model_name] in the prompt.
 
+/chatgpt followed by the prompt: BETA chatgpt model.
+
 /model [model_name]: This changes the current model to the specified model. 
 The available models are: 
 * text-davinci-003
@@ -11,6 +13,10 @@ The available models are:
 * text-babbage-001
 
 /help: This displays information on how to use the bot and lists the available models.
+
+# Screenshot
+![Capture](https://user-images.githubusercontent.com/86234226/222886181-b24ba6ac-9486-45d0-94c4-08b804dfb215.PNG)
+
 
 # Installation
 To use this script, you will need to have Python 3.7 or later installed. You can download Python from the official website.
