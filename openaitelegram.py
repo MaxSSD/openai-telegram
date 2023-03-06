@@ -122,6 +122,3 @@ async def count_users(message: types.Message):
     await message.reply(f"There are {count} users in this chat.")
 
 executor.start_polling(dp)
-
-
-executor.start_polling(dp)
