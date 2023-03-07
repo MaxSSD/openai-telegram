@@ -110,7 +110,7 @@ async def handle_dalle(message):
     image_url = photo_gen['data'][0]['url']
     pngUrl = urllib.request.urlopen(image_url)
 
-    await bot.send_photo(chat_id, photo=pngUrl)
+    await bot.send_photo(chat_id, photo=pngUrl, allow_sending_without_reply=True)
 
 
 @dp.message_handler(commands=['model'])
