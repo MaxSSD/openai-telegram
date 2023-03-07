@@ -3,7 +3,9 @@ This is a Telegram bot that utilizes the OpenAI GPT-3 API to generate responses 
 
 /gpt followed by the prompt: This will generate a response using the current model. The user can also specify a different model by including --model [model_name] in the prompt.
 
-/dan followed by the prompt: BETA chatgp jailbreak model.
+/dalle followed by prompt: Image generation from text.
+
+/dan followed by the prompt: BETA ChatGPT jailbreak model.
 
 /model [model_name]: This changes the current model to the specified model. 
 The available models are: 
