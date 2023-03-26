@@ -19,6 +19,8 @@ The available models are:
 # Screenshot
 ![Capture2](https://user-images.githubusercontent.com/86234226/223409702-4f564985-a847-4068-ae7d-7b8645bbe6bb.PNG)
 
+![Funny](https://user-images.githubusercontent.com/86234226/227764764-9921f001-38b1-4600-b9d5-d0c5eb8173fb.PNG)
+
 ![Capture](https://user-images.githubusercontent.com/86234226/222886181-b24ba6ac-9486-45d0-94c4-08b804dfb215.PNG)
 
 
