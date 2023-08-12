@@ -25,7 +25,6 @@ dp = Dispatcher(bot)
 dp.middleware.setup(LifetimeControllerMiddleware())
 
 
-# Define available models
 available_models = {
     'davinci03': "text-davinci-003",
     'davinci02': "text-davinci-002",
@@ -34,8 +33,6 @@ available_models = {
     'ada': "text-ada-001"
 }
 
-# Argparser to set model variations
-
 
 def get_arguments():
     parser = argparse.ArgumentParser()
@@ -43,15 +40,11 @@ def get_arguments():
                         help="GPT-3 model to use. Available options: davinci03, davinci02, curie, babbage, ada")
     return parser.parse_args()
 
-# Start message
-
 
 @dp.message_handler(commands=['start'])
 async def start_message(message: types.Message):
     await message.reply(
-        "Welcome to the GPT-3 bot! Use the command /gpt, /dan or /dalle followed by your prompt to generate a response. Use the command /help to see the available models.")
-
-#
+        "Welcome to the GPT-3 bot! Use the command /gpt, /gpt4 or /dan for text and, /dalle for image, followed by your prompt to generate a response. Use the command /help to see the available models.")
 
 
 @dp.message_handler(commands=['gpt'])
@@ -64,7 +57,7 @@ async def handle_gpt(message):
         models = prompt.split("--model")[-1].strip()
 
     response = openai.Completion.create(
-        engine=models, prompt=prompt, temperature=1)
+        engine=models, prompt=prompt, temperature=1, max_tokens=3600)
 
     response_str = json.dumps(response)
     json_response = json.loads(response_str)
@@ -72,6 +65,26 @@ async def handle_gpt(message):
 
     await message.reply(model_response)
 
+@dp.message_handler(commands=['gpt4'])
+@rate_limit(10, key="gpt4")
+async def handle_chat(message):
+    user_prompt = message.text.replace("/gpt4 ", "")
+    api_message = [
+        {"role": "system", "content": "You are an assistant"},
+        {"role": "user", "content": user_prompt},
+        {"role": "assistant", "content": "Proceed to answer as a helpful assistant"}
+    ]
+
+    chat = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=api_message
+    )
+
+    response_str = json.dumps(chat)
+    json_response = json.loads(response_str)
+    gpt4_response = json_response['choices'][0]['message']['content']
+
+    await message.reply(gpt4_response)
 
 @dp.message_handler(commands=['dan'])
 @rate_limit(10, key="dan")
@@ -84,7 +97,7 @@ async def handle_chat(message):
     ]
 
     chat = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4",
         messages=api_message
     )
 
@@ -131,7 +144,7 @@ async def handle_model(message: types.Message):
 async def handle_help(message: types.Message):
     # Set help message
     available_models = "davinci03, davinci02, curie, babbage, ada"
-    await message.reply("Use the command /gpt for text or /dalle for image followed by your prompt to generate a response. To use Gpt-3.5-turbo use command /dan - BETA")
+    await message.reply("Gpt-4 use command /dan or /gpt4. Use the command /gpt or /dan for text. /dalle, followed by prompt to generate an image.")
     await message.reply(f"Use /model option followed by the desired model when running the script. Available models: {available_models}")
 
 
